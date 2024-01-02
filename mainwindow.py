@@ -1,6 +1,11 @@
+import random
+
 from PyQt6.QtCore import Qt
-from PyQt6.QtGui import QAction
-from PyQt6.QtWidgets import QWidget, QVBoxLayout, QHBoxLayout, QRadioButton, QLabel, QPushButton, QMenu
+from PyQt6.QtGui import QAction, QPalette, QColor
+from PyQt6.QtWidgets import QWidget, QVBoxLayout, QHBoxLayout, QRadioButton, QLabel, QPushButton, QMenu, QMessageBox, \
+    QInputDialog
+
+from wordlist import Word, insert_word, load_words
 
 
 class MainWindow(QWidget):
@@ -65,23 +70,84 @@ class MainWindow(QWidget):
 
         self.setup_styles()
 
-    def setup_styles(self):
-        pass
+        self.set_application_style()
 
-    def set_level(self, param):
-        pass
-
-    def show_meaning(self):
-        pass
-
-    def show_random_word(self):
-        pass
+    def set_application_style(self):
+        palette = QPalette()
+        palette.setColor(QPalette.ColorRole.Window, QColor(252, 217, 239))
+        palette.setColor(QPalette.ColorRole.WindowText, QColor(199, 4, 43))
+        self.setPalette(palette)
 
     def insert_word_dialog(self):
-        pass
+        """Displays a dialog for inserting a new word."""
+        word, ok = QInputDialog.getText(self, 'Insert Word', 'Enter Word:')
+        if ok and word:
+            meaning, ok = QInputDialog.getText(self, 'Insert Word', 'Enter Meaning:')
+            if ok and meaning:
+                level, ok = QInputDialog.getItem(self, 'Insert Word', "Select Level:", ['easy', 'medium', 'hard'], 0, False)
+                if ok:
+                    new_word = Word(word, meaning, level)
+                    insert_word(new_word)
+                    self.words = load_words()
+                    self.show_random_word()
 
+    def set_level(self, level):
+        """Sets the current difficulty level of the words."""
+        self.current_level = level
+        self.show_random_word()
 
+    def show_random_word(self):
+        """Shows a random word from the selected level"""
+        if self.current_level:
+            level_words = [word for word in self.words if word.level == self.current_level]
+            if level_words:
+                self.word = random.choice(level_words)
+                self.label_word.setText(self.word.word)
+                self.label_meaning.clear()
+            else:
+                QMessageBox.warning(self, "Warning", f"No word found for level: {self.current_level}")
+        else:
+            QMessageBox.warning(self, "Warning", "Please select a difficulty level")
 
+    def show_meaning(self):
+        """Displays the meaning of the current word"""
+        if hasattr(self, 'word'):
+            self.label_meaning.setText(self.word.meaning)
+        else:
+            QMessageBox.warning(self, "Warning", "No word to show meaning.")
 
-
+    def setup_styles(self):
+        """Defines the styles for the buttons and labels"""
+        self.label_word.setStyleSheet("""
+             QLabel { 
+                 color: blue;         /* Mavi*/
+                 font-size: 30px;     /*Boyut*/
+                 font-family: "Berlin Sans FB";   /* Yazı Tipi*/
+                 font-weight: bold;   /*Kalın*/
+                 }
+        """)
+        self.label_meaning.setStyleSheet("""
+             QLabel { 
+                 color: #4287f5; 
+                 font-size: 20px; 
+             }
+        """)
+        self.button_show_meaning.setStyleSheet("""
+             QPushButton  {
+                background-color:#eff549;
+                font-size: 18px; 
+             }
+        """)
+        self.button_next.setStyleSheet("""
+            QPushButton  {
+                background-color:#bdc3c7;
+                font-size: 18px; 
+            }
+        """)
+        self.button_menu.setStyleSheet("""
+            QPushButton  {
+                background-color:#66faf0;
+                font-size: 16px; 
+                }
+        """)
 

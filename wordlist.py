@@ -48,7 +48,7 @@ def load_words():
     rows = cursor.fetchall()
 
     for row in rows:
-        words.append(Word(row[0], row[1], row[2]))
+        words.append(Word(row[1], row[2], row[3]))
 
     connection.close()
     return words
@@ -62,4 +62,3 @@ if __name__ == '__main__':
         for row in reader:
             word = Word(row[0], row[1], row[2])
             insert_word(word)
-
